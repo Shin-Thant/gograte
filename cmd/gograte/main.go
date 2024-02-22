@@ -21,6 +21,8 @@ func main() {
 	action := args[0]
 
 	switch action {
+	case "init":
+		gograte.Init()
 	case "create":
 		gograte.Create(args)
 	case "migrate":
