@@ -2,10 +2,14 @@ package gograte
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/google/uuid"
 )
+
+var initUsage = `No migration directory found.
+Please run "gograte init" to create a migrations directory.`
 
 // argument indexes
 var MIGRATION = 1
@@ -25,4 +29,22 @@ func Create(args []string) {
 
 	id := uuid.New()
 	fmt.Println(id)
+
+	// check directory exists
+	info, err := os.Stat("./migrations")
+	if err != nil {
+		log.Fatalf(`Error checking for migration directory: %s
+
+%s`, err, initUsage)
+
+	}
+	if !info.IsDir() {
+		log.Fatalln(initUsage)
+	}
+
+	// file, err := os.Create(filepath.Join("./migrations", id.String()+".sql"))
+	// if err != nil {
+	// 	log.Fatalln("Error creating migration file:", err)
+	// }
+	// defer file.Close()
 }
