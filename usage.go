@@ -1,6 +1,8 @@
 package gograte
 
 var UsageMessage = `Usage:
+// Init
+gograte init
 
 // Create
 gograte create [migration_name]
