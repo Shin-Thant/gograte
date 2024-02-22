@@ -1,0 +1,123 @@
+package main
+
+import (
+	"context"
+	"database/sql"
+	"flag"
+	"fmt"
+	"log"
+	"net/url"
+	"os"
+	"path"
+	"path/filepath"
+
+	"github.com/Shin-Thant/gograte"
+	_ "github.com/jackc/pgx/v5/stdlib"
+)
+
+type ValidData []string
+
+func (v *ValidData) String() string {
+	output := ""
+	length := len(*v)
+	for index, item := range *v {
+		if index == length-1 {
+			output += item
+		} else {
+			output += item + ", "
+		}
+	}
+	return output
+}
+
+func main() {
+	flag.Parse()
+	args := flag.Args()
+	if len(args) < 3 {
+		log.Fatalln("Usage: gograte <db_driver> <db_url> <action>")
+	}
+
+	driver := args[0]
+	dbURL := args[1]
+	action := args[2]
+
+	if !validateDbDriver(driver) {
+		log.Fatalf("Invalid database driver. Supported databases are: %s\n", DB_DRIVERS.String())
+	}
+	validatedURL, err := validateDbURL(dbURL)
+	if err != nil {
+		log.Fatalln("Invalid database URL. Please provide a valid URL.")
+	}
+	if !validateAction(action) {
+		log.Fatalf("Invalid action. Supported actions are: %s\n", ACTIONS.String())
+	}
+
+	driver = gograte.GetSQLDriver(driver)
+	fmt.Println("Driver:", driver)
+	fmt.Println("Database URL:", validatedURL)
+	fmt.Println("Action:", action)
+
+	db, err := sql.Open(driver, dbURL)
+	if err != nil {
+		log.Fatalf("Error opening database: %v\n", err)
+	}
+	defer db.Close()
+
+	conn, err := db.Conn(context.Background())
+	if err != nil {
+		log.Fatalf("Error database connection: %v\n", err)
+	}
+	defer conn.Close()
+
+	currentDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Error getting current directory: %v\n", err)
+	}
+	matches, err := filepath.Glob(path.Join(currentDir, "*.sql"))
+	if err != nil {
+		log.Fatalf("Error getting files: %v\n", err)
+	}
+	if len(matches) == 0 {
+		log.Fatalln("No migration files found.")
+	}
+	fmt.Println(matches)
+	rows, err := db.Query("SELECT * FROM _gograte_db_versions")
+	if err != nil {
+		log.Fatalf("Error querying database versions: %v\n", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		fmt.Println(rows.Columns())
+	}
+}
+
+var DB_DRIVERS ValidData = []string{"mysql", "postgres", "sqlite3", "mssql"}
+
+func validateDbDriver(inputDriver string) bool {
+	for _, name := range DB_DRIVERS {
+		if name == inputDriver {
+			return true
+		}
+	}
+	return false
+}
+
+func validateDbURL(inputDbURL string) (*url.URL, error) {
+	u, err := url.ParseRequestURI(inputDbURL)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
+
+var ACTIONS ValidData = []string{"up", "down"}
+
+func validateAction(inputAction string) bool {
+	for _, action := range ACTIONS {
+		if action == inputAction {
+			return true
+		}
+	}
+	return false
+}
