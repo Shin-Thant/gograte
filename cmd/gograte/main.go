@@ -9,20 +9,12 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-var usageMessage = `Usage:
-
-// Create
-gograte create [migration_name]
-
-// Migrate
-gograte migrate [db_driver] [db_url] [migrate_action]`
-
 func main() {
 	flag.Parse()
 	args := flag.Args()
 
 	if len(args) == 0 {
-		fmt.Println(usageMessage)
+		fmt.Println(gograte.UsageMessage)
 		os.Exit(1)
 	}
 
@@ -30,10 +22,10 @@ func main() {
 
 	switch action {
 	case "create":
-		fmt.Println("Creating migration file...")
+		gograte.Create(args)
 	case "migrate":
 		gograte.Migrate(args)
 	default:
-		fmt.Println(usageMessage)
+		fmt.Println(gograte.UsageMessage)
 	}
 }

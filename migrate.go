@@ -26,10 +26,15 @@ func (v *ValidData) String() string {
 	return output
 }
 
+// argument indexes
+var DRIVER = 1
+var DB_URL = 2
+var ACTION = 3
+
 func Migrate(args []string) {
-	driver := args[1]
-	dbURL := args[2]
-	action := args[3]
+	driver := args[DRIVER]
+	dbURL := args[DB_URL]
+	action := args[ACTION]
 
 	if !validateDbDriver(driver) {
 		log.Fatalf("Invalid database driver. Supported databases are: %s\n", DB_DRIVERS.String())
