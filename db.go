@@ -16,7 +16,7 @@ func GetSQLDriver(driver string) string {
 	return ""
 }
 
-func CreateTableIfNotExist(db *sql.DB) (sql.Result, error) {
+func CreateMigrationTableIfNotExist(db *sql.DB) (sql.Result, error) {
 	return db.Exec(`CREATE TABLE IF NOT EXISTS _gograte_db_versions (
 		id VARCHAR(255) PRIMARY KEY,
 		version_id VARCHAR(255) NOT NULL,

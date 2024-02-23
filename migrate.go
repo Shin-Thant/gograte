@@ -4,14 +4,10 @@ import (
 	"bufio"
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/url"
 	"os"
-	"path"
-	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -57,11 +53,8 @@ func Migrate(args []string) {
 	}
 
 	driver = GetSQLDriver(driver)
-	fmt.Println("Driver:", driver)
-	fmt.Println("Database URL:", validatedURL)
-	fmt.Println("Action:", action)
 
-	db, err := sql.Open(driver, dbURL)
+	db, err := sql.Open(driver, validatedURL.String())
 	if err != nil {
 		log.Fatalf("Error opening database: %v\n", err)
 	}
@@ -73,11 +66,7 @@ func Migrate(args []string) {
 	}
 	defer conn.Close()
 
-	currentDir, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Error getting current directory: %v\n", err)
-	}
-	matches, err := filepath.Glob(path.Join(currentDir, "migrations", "*.sql"))
+	matches, err := findMigrationFiles()
 	if err != nil {
 		log.Fatalf("Error getting files: %v\n", err)
 	}
@@ -85,28 +74,12 @@ func Migrate(args []string) {
 		log.Fatalln("No migration files found.")
 	}
 
-	_, err = CreateTableIfNotExist(db)
+	_, err = CreateMigrationTableIfNotExist(db)
 	if err != nil {
 		log.Fatalf("Error creating migration table: %v\n", err)
 	}
 
-	migrations := make([]migrationFile, len(matches))
-	for index, path := range matches {
-		targetFile := filepath.Base(path)
-		fileSlice := strings.Split(targetFile, "_")
-		if len(fileSlice) != 2 {
-			continue
-		}
-		numericPart := fileSlice[0]
-		result, err := strconv.Atoi(numericPart)
-		if err != nil {
-			continue
-		}
-		migrations[index] = migrationFile{
-			Timestamp: result,
-			Path:      path,
-		}
-	}
+	migrations := filterMigrationFilePaths(matches)
 	sort.SliceStable(migrations, func(i, j int) bool {
 		return migrations[i].Timestamp < migrations[j].Timestamp
 	})
@@ -127,17 +100,17 @@ func Migrate(args []string) {
 		scanner := bufio.NewScanner(file)
 		scanner.Split(bufio.ScanLines)
 		var statement string
-		downMigrateStart := false
+		isDownMigrateStarted := false
 
 		for scanner.Scan() {
 			line := scanner.Text()
-			isDownMigrate := strings.HasPrefix(line, "-- +gograte Down")
+			isDownMigrate := strings.HasPrefix(line, downMigrateComment)
 
 			if action == "up" {
 				if isDownMigrate {
 					break
 				}
-				isComment := strings.HasPrefix(line, "--")
+				isComment := strings.HasPrefix(line, commentSyntax)
 				if isComment {
 					continue
 				}
@@ -146,11 +119,11 @@ func Migrate(args []string) {
 			}
 
 			if action == "down" {
-				if !isDownMigrate && !downMigrateStart {
+				if !isDownMigrate && !isDownMigrateStarted {
 					continue
 				}
-				if !downMigrateStart {
-					downMigrateStart = true
+				if !isDownMigrateStarted {
+					isDownMigrateStarted = true
 					continue
 				}
 				isComment := strings.HasPrefix(line, "--")
