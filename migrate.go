@@ -1,6 +1,7 @@
 package gograte
 
 import (
+	"bufio"
 	"context"
 	"database/sql"
 	"fmt"
@@ -9,7 +10,15 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
+	"strconv"
+	"strings"
 )
+
+type migrationFile struct {
+	Timestamp int
+	Path      string
+}
 
 type ValidData []string
 
@@ -79,6 +88,100 @@ func Migrate(args []string) {
 	_, err = CreateTableIfNotExist(db)
 	if err != nil {
 		log.Fatalf("Error creating migration table: %v\n", err)
+	}
+
+	migrations := make([]migrationFile, len(matches))
+	for index, path := range matches {
+		targetFile := filepath.Base(path)
+		fileSlice := strings.Split(targetFile, "_")
+		if len(fileSlice) != 2 {
+			continue
+		}
+		numericPart := fileSlice[0]
+		result, err := strconv.Atoi(numericPart)
+		if err != nil {
+			continue
+		}
+		migrations[index] = migrationFile{
+			Timestamp: result,
+			Path:      path,
+		}
+	}
+	sort.SliceStable(migrations, func(i, j int) bool {
+		return migrations[i].Timestamp < migrations[j].Timestamp
+	})
+
+	for _, m := range migrations {
+		file, err := os.Open(m.Path)
+		if err != nil {
+			log.Fatalf("Error migration opening file: %v\n", err)
+			return
+		}
+		defer file.Close()
+
+		info, err := file.Stat()
+		if err != nil || info.IsDir() {
+			continue
+		}
+
+		scanner := bufio.NewScanner(file)
+		scanner.Split(bufio.ScanLines)
+		var statement string
+		downMigrateStart := false
+
+		for scanner.Scan() {
+			line := scanner.Text()
+			isDownMigrate := strings.HasPrefix(line, "-- +gograte Down")
+
+			if action == "up" {
+				if isDownMigrate {
+					break
+				}
+				isComment := strings.HasPrefix(line, "--")
+				if isComment {
+					continue
+				}
+
+				statement += line
+			}
+
+			if action == "down" {
+				if !isDownMigrate && !downMigrateStart {
+					continue
+				}
+				if !downMigrateStart {
+					downMigrateStart = true
+					continue
+				}
+				isComment := strings.HasPrefix(line, "--")
+				if isComment {
+					continue
+				}
+
+				statement += line
+			}
+		}
+
+		tx, err := db.Begin()
+		if err != nil {
+			log.Printf("Error beginning transaction: %v\n", err)
+			return
+		}
+		_, err = db.Exec(statement)
+		if err != nil {
+			log.Printf("Error executing migration: %v\n", err)
+
+			err = tx.Rollback()
+			if err != nil {
+				log.Printf("Error rolling back transaction: %v\n", err)
+			}
+			return
+		}
+		err = tx.Commit()
+		if err != nil {
+			log.Printf("Error committing transaction: %v\n", err)
+			return
+		}
 	}
 
 	// rows, err := db.Query("SELECT * FROM _gograte_db_versions;")
