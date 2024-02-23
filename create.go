@@ -5,8 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
-	"github.com/google/uuid"
+	"time"
 )
 
 // argument indexes
@@ -25,8 +24,6 @@ func Create(args []string) {
 	}
 	fmt.Println("Creating migration file:", migrationName)
 
-	id := uuid.New()
-
 	// check directory exists
 	info, err := os.Stat("./migrations")
 	if err != nil {
@@ -39,12 +36,17 @@ func Create(args []string) {
 		log.Fatalln(initUsage)
 	}
 
-	file, err := os.Create(filepath.Join("./migrations", id.String()+".sql"))
+	filename := generateFilename(migrationName)
+	file, err := os.Create(filepath.Join("./migrations", filename))
 	if err != nil {
 		log.Fatalln("Error creating migration file:", err)
 	}
 	defer file.Close()
 	file.Write([]byte(initContent))
 
-	log.Println("Migration file created:", id.String()+".sql")
+	log.Println("Migration file created:", filename)
+}
+
+func generateFilename(migrationName string) string {
+	return fmt.Sprintf("%v_%s.sql", time.Now().UTC().Format(timestampFormat), migrationName)
 }
