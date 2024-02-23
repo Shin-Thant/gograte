@@ -26,7 +26,6 @@ func Create(args []string) {
 	fmt.Println("Creating migration file:", migrationName)
 
 	id := uuid.New()
-	fmt.Println(id)
 
 	// check directory exists
 	info, err := os.Stat("./migrations")
@@ -46,4 +45,6 @@ func Create(args []string) {
 	}
 	defer file.Close()
 	file.Write([]byte(initContent))
+
+	log.Println("Migration file created:", id.String()+".sql")
 }
