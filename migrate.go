@@ -68,7 +68,7 @@ func Migrate(args []string) {
 	if err != nil {
 		log.Fatalf("Error getting current directory: %v\n", err)
 	}
-	matches, err := filepath.Glob(path.Join(currentDir, "*.sql"))
+	matches, err := filepath.Glob(path.Join(currentDir, "migrations", "*.sql"))
 	if err != nil {
 		log.Fatalf("Error getting files: %v\n", err)
 	}
@@ -76,25 +76,22 @@ func Migrate(args []string) {
 		log.Fatalln("No migration files found.")
 	}
 
-	result, err := db.Exec(`CREATE TABLE IF NOT EXISTS _gograte_db_versions (
-		id VARCHAR(255) PRIMARY KEY,
-		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-	)`)
+	_, err = CreateTableIfNotExist(db)
 	if err != nil {
 		log.Fatalf("Error creating migration table: %v\n", err)
 	}
-	fmt.Println(result.LastInsertId())
-	fmt.Println(result.RowsAffected())
 
-	// rows, err := db.Query("SELECT * FROM _gograte_db_versions")
+	// rows, err := db.Query("SELECT * FROM _gograte_db_versions;")
 	// if err != nil {
 	// 	log.Fatalf("Error querying database versions: %v\n", err)
 	// }
 	// defer rows.Close()
 
 	// for rows.Next() {
-	// 	fmt.Println(rows.Columns())
+	// 	res, err := rows.Columns()
+	// 	fmt.Println(res, err)
 	// }
+
 }
 
 var DB_DRIVERS ValidData = []string{"mysql", "postgres", "sqlite3", "mssql"}
