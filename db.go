@@ -2,6 +2,7 @@ package gograte
 
 import (
 	"database/sql"
+	"log"
 )
 
 func GetSQLDriver(driver string) string {
@@ -23,6 +24,31 @@ func CreateMigrationTableIfNotExist(db *sql.DB) (sql.Result, error) {
 		is_applied BOOLEAN NOT NULL DEFAULT FALSE,
 		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 	);`)
+}
+
+func runMigration(db *sql.DB, statement string) error {
+	tx, err := db.Begin()
+	if err != nil {
+		log.Printf("Error beginning transaction: %v\n", err)
+		return err
+	}
+	_, err = db.Exec(statement)
+	if err != nil {
+		log.Printf("Error executing migration: %v\n", err)
+
+		err = tx.Rollback()
+		if err != nil {
+			log.Printf("Error rolling-back transaction: %v\n", err)
+		}
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("Error committing transaction: %v\n", err)
+		return err
+	}
+
+	return nil
 }
 
 // func CheckTableExists(db *sql.DB) bool {

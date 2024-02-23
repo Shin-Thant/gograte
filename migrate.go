@@ -135,26 +135,7 @@ func Migrate(args []string) {
 			}
 		}
 
-		tx, err := db.Begin()
-		if err != nil {
-			log.Printf("Error beginning transaction: %v\n", err)
-			return
-		}
-		_, err = db.Exec(statement)
-		if err != nil {
-			log.Printf("Error executing migration: %v\n", err)
-
-			err = tx.Rollback()
-			if err != nil {
-				log.Printf("Error rolling back transaction: %v\n", err)
-			}
-			return
-		}
-		err = tx.Commit()
-		if err != nil {
-			log.Printf("Error committing transaction: %v\n", err)
-			return
-		}
+		_ = runMigration(db, statement)
 	}
 
 	// rows, err := db.Query("SELECT * FROM _gograte_db_versions;")
