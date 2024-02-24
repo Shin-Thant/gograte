@@ -20,8 +20,8 @@ func GetSQLDriver(driver string) string {
 func CreateMigrationTableIfNotExist(db *sql.DB) (sql.Result, error) {
 	return db.Exec(`CREATE TABLE IF NOT EXISTS _gograte_db_versions (
 		id VARCHAR(255) PRIMARY KEY,
-		version_id VARCHAR(255) NOT NULL,
-		is_applied BOOLEAN NOT NULL DEFAULT FALSE,
+		version_id BIGINT NOT NULL,
+		is_applied BOOLEAN NOT NULL DEFAULT TRUE,
 		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 	);`)
 }
