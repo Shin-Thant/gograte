@@ -135,7 +135,15 @@ func Migrate(args []string) {
 			}
 		}
 
-		_ = runMigration(db, statement)
+		err = runMigration(db, statement)
+		if err != nil {
+			return
+		}
+
+		_, err = insertVersionRecord(&m, db)
+		if err != nil {
+			log.Fatalf("Error inserting migration version: %v\n", err)
+		}
 	}
 
 	// rows, err := db.Query("SELECT * FROM _gograte_db_versions;")

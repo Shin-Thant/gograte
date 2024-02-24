@@ -2,7 +2,10 @@ package gograte
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+
+	"github.com/google/uuid"
 )
 
 func GetSQLDriver(driver string) string {
@@ -49,6 +52,12 @@ func runMigration(db *sql.DB, statement string) error {
 	}
 
 	return nil
+}
+
+func insertVersionRecord(m *migrationFile, db *sql.DB) (sql.Result, error) {
+	id := uuid.New()
+	query := fmt.Sprintf(`INSERT INTO _gograte_db_versions (id, version_id) VALUES ('%s', %d);`, id.String(), m.Timestamp)
+	return db.Exec(query)
 }
 
 // func CheckTableExists(db *sql.DB) bool {
