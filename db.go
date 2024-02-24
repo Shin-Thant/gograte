@@ -8,6 +8,17 @@ import (
 	"github.com/google/uuid"
 )
 
+type migrationRecord struct {
+	ID        string
+	VersionID int
+	IsApplied bool
+	CreatedAt string
+}
+
+func NewMigrationRecord() *migrationRecord {
+	return &migrationRecord{}
+}
+
 func GetSQLDriver(driver string) string {
 	switch driver {
 	case "mssql":
@@ -60,9 +71,21 @@ func insertVersionRecord(m *migrationFile, db *sql.DB) (sql.Result, error) {
 	return db.Exec(query)
 }
 
-// func CheckTableExists(db *sql.DB) bool {
-// 	query := "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = '_gograte_db_versions')"
-// 	var exists bool
-// 	db.QueryRow(query).Scan(&exists)
-// 	return exists
-// }
+func queryMigrationRecord(db *sql.DB) ([]migrationRecord, error) {
+	rows, err := db.Query("SELECT * FROM _gograte_db_versions;")
+	if err != nil {
+		return nil, fmt.Errorf("error querying database versions: %v", err)
+	}
+	defer rows.Close()
+
+	var records []migrationRecord
+	for rows.Next() {
+		record := NewMigrationRecord()
+		err = rows.Scan(&record.ID, &record.VersionID, &record.IsApplied, &record.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning migration record: %v", err)
+		}
+		records = append(records, *record)
+	}
+	return records, nil
+}

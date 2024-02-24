@@ -84,6 +84,11 @@ func Migrate(args []string) {
 		return migrations[i].Timestamp < migrations[j].Timestamp
 	})
 
+	_, err = queryMigrationRecord(db)
+	if err != nil {
+		log.Fatalf("Error querying migration records: %v\n", err)
+	}
+
 	for _, m := range migrations {
 		file, err := os.Open(m.Path)
 		if err != nil {
@@ -145,17 +150,6 @@ func Migrate(args []string) {
 			log.Fatalf("Error inserting migration version: %v\n", err)
 		}
 	}
-
-	// rows, err := db.Query("SELECT * FROM _gograte_db_versions;")
-	// if err != nil {
-	// 	log.Fatalf("Error querying database versions: %v\n", err)
-	// }
-	// defer rows.Close()
-
-	// for rows.Next() {
-	// 	res, err := rows.Columns()
-	// 	fmt.Println(res, err)
-	// }
 
 }
 
