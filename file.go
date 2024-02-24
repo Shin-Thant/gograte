@@ -16,7 +16,7 @@ func findMigrationFiles() ([]string, error) {
 	return filepath.Glob(path.Join(currentDir, "migrations", "*.sql"))
 }
 
-func filterMigrationFilePaths(paths []string) []migrationFile {
+func validateMigrationFilePaths(paths []string) []migrationFile {
 	migrations := make([]migrationFile, len(paths))
 
 	for index, path := range paths {

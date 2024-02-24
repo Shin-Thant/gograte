@@ -79,7 +79,7 @@ func Migrate(args []string) {
 		log.Fatalf("Error creating migration table: %v\n", err)
 	}
 
-	migrations := filterMigrationFilePaths(matches)
+	migrations := validateMigrationFilePaths(matches)
 	sort.SliceStable(migrations, func(i, j int) bool {
 		return migrations[i].Timestamp < migrations[j].Timestamp
 	})

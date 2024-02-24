@@ -1,5 +1,0 @@
-package gograte
-
-func up() {
-
-}
