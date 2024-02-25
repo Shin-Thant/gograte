@@ -40,12 +40,13 @@ func CreateMigrationTableIfNotExist(db *sql.DB) (sql.Result, error) {
 	);`)
 }
 
-func runMigration(db *sql.DB, statement string) error {
+func runMigration(db *sql.DB, statement, action string) error {
 	tx, err := db.Begin()
 	if err != nil {
 		log.Printf("Error beginning transaction: %v\n", err)
 		return err
 	}
+
 	_, err = db.Exec(statement)
 	if err != nil {
 		log.Printf("Error executing migration: %v\n", err)
@@ -56,6 +57,7 @@ func runMigration(db *sql.DB, statement string) error {
 		}
 		return err
 	}
+
 	err = tx.Commit()
 	if err != nil {
 		log.Printf("Error committing transaction: %v\n", err)

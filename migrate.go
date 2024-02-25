@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -84,12 +85,53 @@ func Migrate(args []string) {
 		return migrations[i].Timestamp < migrations[j].Timestamp
 	})
 
-	_, err = queryMigrationRecord(db)
+	records, err := queryMigrationRecord(db)
 	if err != nil {
 		log.Fatalf("Error querying migration records: %v\n", err)
 	}
 
+	var filteredMigrationFiles []migrationFile
 	for _, m := range migrations {
+		if len(records) == 0 && action == "up" {
+			filteredMigrationFiles = append(filteredMigrationFiles, m)
+			continue
+		}
+
+		isInRecord := false
+
+	RecordLoop:
+		for _, record := range records {
+			fmt.Println(record.VersionID, m.Timestamp, record.VersionID == m.Timestamp)
+			switch action {
+			case "up":
+				if record.VersionID == m.Timestamp {
+					isInRecord = true
+					if !record.IsApplied {
+						filteredMigrationFiles = append(filteredMigrationFiles, m)
+					}
+					break RecordLoop
+				}
+			case "down":
+				if record.VersionID == m.Timestamp {
+					if record.IsApplied {
+						filteredMigrationFiles = append(filteredMigrationFiles, m)
+					}
+					break RecordLoop
+				}
+			}
+		}
+
+		if !isInRecord && action == "up" {
+			filteredMigrationFiles = append(filteredMigrationFiles, m)
+		}
+	}
+
+	if len(filteredMigrationFiles) == 0 {
+		log.Println("No migration to run.")
+		return
+	}
+
+	for _, m := range filteredMigrationFiles {
 		file, err := os.Open(m.Path)
 		if err != nil {
 			log.Fatalf("Error migration opening file: %v\n", err)
@@ -140,15 +182,16 @@ func Migrate(args []string) {
 			}
 		}
 
-		err = runMigration(db, statement)
-		if err != nil {
-			return
-		}
+		fmt.Println("Running migration: ", m.Path)
+		// err = runMigration(db, statement)
+		// if err != nil {
+		// 	return
+		// }
 
-		_, err = insertVersionRecord(&m, db)
-		if err != nil {
-			log.Fatalf("Error inserting migration version: %v\n", err)
-		}
+		// _, err = insertVersionRecord(&m, db)
+		// if err != nil {
+		// 	log.Fatalf("Error inserting migration version: %v\n", err)
+		// }
 	}
 
 }
