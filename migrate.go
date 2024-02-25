@@ -15,6 +15,7 @@ import (
 type migrationFile struct {
 	Timestamp int
 	Path      string
+	IsNewFile bool
 }
 
 type ValidData []string
@@ -122,6 +123,7 @@ func Migrate(args []string) {
 		}
 
 		if !isInRecord && action == "up" {
+			m.IsNewFile = true
 			filteredMigrationFiles = append(filteredMigrationFiles, m)
 		}
 	}
@@ -182,18 +184,39 @@ func Migrate(args []string) {
 			}
 		}
 
-		fmt.Println("Running migration: ", m.Path)
-		// err = runMigration(db, statement)
-		// if err != nil {
-		// 	return
-		// }
+		fmt.Println(m)
 
-		// _, err = insertVersionRecord(&m, db)
-		// if err != nil {
-		// 	log.Fatalf("Error inserting migration version: %v\n", err)
-		// }
+		tx, err := db.Begin()
+		if err != nil {
+			log.Fatalf("Error beginning transaction: %v\n", err)
+		}
+
+		_, err = runMigration(tx, statement)
+		if err != nil {
+			log.Printf("Error executing migration: %v\n", err)
+
+			err = tx.Rollback()
+			if err != nil {
+				log.Printf("Error rolling-back transaction: %v\n", err)
+			}
+			return
+		}
+
+		switch action {
+		case "up":
+			err = upMigrate(&m, tx)
+		case "down":
+			err = downMigrate(&m, tx)
+		}
+		if err != nil {
+			return
+		}
+
+		err = tx.Commit()
+		if err != nil {
+			log.Fatalf("Error committing transaction: %v\n", err)
+		}
 	}
-
 }
 
 var DB_DRIVERS ValidData = []string{"mysql", "postgres", "sqlite3", "mssql"}

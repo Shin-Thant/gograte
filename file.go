@@ -33,6 +33,7 @@ func validateMigrationFilePaths(paths []string) []migrationFile {
 		migrations[index] = migrationFile{
 			Timestamp: result,
 			Path:      path,
+			IsNewFile: false,
 		}
 	}
 

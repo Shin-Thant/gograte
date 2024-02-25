@@ -3,7 +3,6 @@ package gograte
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 )
@@ -34,43 +33,25 @@ func GetSQLDriver(driver string) string {
 func CreateMigrationTableIfNotExist(db *sql.DB) (sql.Result, error) {
 	return db.Exec(`CREATE TABLE IF NOT EXISTS _gograte_db_versions (
 		id VARCHAR(255) PRIMARY KEY,
-		version_id BIGINT NOT NULL,
+		version_id BIGINT UNIQUE NOT NULL,
 		is_applied BOOLEAN NOT NULL DEFAULT TRUE,
 		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 	);`)
 }
 
-func runMigration(db *sql.DB, statement, action string) error {
-	tx, err := db.Begin()
-	if err != nil {
-		log.Printf("Error beginning transaction: %v\n", err)
-		return err
-	}
-
-	_, err = db.Exec(statement)
-	if err != nil {
-		log.Printf("Error executing migration: %v\n", err)
-
-		err = tx.Rollback()
-		if err != nil {
-			log.Printf("Error rolling-back transaction: %v\n", err)
-		}
-		return err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		log.Printf("Error committing transaction: %v\n", err)
-		return err
-	}
-
-	return nil
+func runMigration(tx *sql.Tx, statement string) (sql.Result, error) {
+	return tx.Exec(statement)
 }
 
-func insertVersionRecord(m *migrationFile, db *sql.DB) (sql.Result, error) {
+func insertVersionRecord(m *migrationFile, tx *sql.Tx) (sql.Result, error) {
 	id := uuid.New()
 	query := fmt.Sprintf(`INSERT INTO _gograte_db_versions (id, version_id) VALUES ('%s', %d);`, id.String(), m.Timestamp)
-	return db.Exec(query)
+	return tx.Exec(query)
+}
+
+func updateVersionRecord(m *migrationFile, tx *sql.Tx, isApplied bool) (sql.Result, error) {
+	query := fmt.Sprintf(`UPDATE _gograte_db_versions SET is_applied = %t WHERE version_id = %d;`, isApplied, m.Timestamp)
+	return tx.Exec(query)
 }
 
 func queryMigrationRecord(db *sql.DB) ([]migrationRecord, error) {
