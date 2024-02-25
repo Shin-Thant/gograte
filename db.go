@@ -72,7 +72,10 @@ func insertVersionRecord(m *migrationFile, db *sql.DB) (sql.Result, error) {
 }
 
 func queryMigrationRecord(db *sql.DB) ([]migrationRecord, error) {
-	rows, err := db.Query("SELECT * FROM _gograte_db_versions;")
+	rows, err := db.Query(`
+	SELECT * FROM _gograte_db_versions
+	ORDER BY created_at ASC;
+	`)
 	if err != nil {
 		return nil, fmt.Errorf("error querying database versions: %v", err)
 	}
