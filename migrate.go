@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -14,6 +13,7 @@ import (
 
 type migrationFile struct {
 	Timestamp int
+	FileName  string
 	Path      string
 	IsNewFile bool
 }
@@ -102,7 +102,6 @@ func Migrate(args []string) {
 
 	RecordLoop:
 		for _, record := range records {
-			fmt.Println(record.VersionID, m.Timestamp, record.VersionID == m.Timestamp)
 			switch action {
 			case "up":
 				if record.VersionID == m.Timestamp {
@@ -149,7 +148,7 @@ func Migrate(args []string) {
 		scanner := bufio.NewScanner(file)
 		scanner.Split(bufio.ScanLines)
 		var statement string
-		isDownMigrateStarted := false
+		hasPassedDownMigrateCmt := false
 
 		for scanner.Scan() {
 			line := scanner.Text()
@@ -168,11 +167,11 @@ func Migrate(args []string) {
 			}
 
 			if action == "down" {
-				if !isDownMigrate && !isDownMigrateStarted {
+				if !isDownMigrate && !hasPassedDownMigrateCmt {
 					continue
 				}
-				if !isDownMigrateStarted {
-					isDownMigrateStarted = true
+				if !hasPassedDownMigrateCmt {
+					hasPassedDownMigrateCmt = true
 					continue
 				}
 				isComment := strings.HasPrefix(line, "--")
@@ -183,8 +182,6 @@ func Migrate(args []string) {
 				statement += line
 			}
 		}
-
-		fmt.Println(m)
 
 		tx, err := db.Begin()
 		if err != nil {
@@ -215,7 +212,10 @@ func Migrate(args []string) {
 		err = tx.Commit()
 		if err != nil {
 			log.Fatalf("Error committing transaction: %v\n", err)
+			return
 		}
+
+		log.Println("OK    ", m.FileName)
 	}
 }
 

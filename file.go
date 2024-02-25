@@ -16,6 +16,8 @@ func findMigrationFiles() ([]string, error) {
 	return filepath.Glob(path.Join(currentDir, "migrations", "*.sql"))
 }
 
+var timestampIdx = 0
+
 func validateMigrationFilePaths(paths []string) []migrationFile {
 	migrations := make([]migrationFile, len(paths))
 
@@ -25,13 +27,14 @@ func validateMigrationFilePaths(paths []string) []migrationFile {
 		if len(fileSlice) != 2 {
 			continue
 		}
-		numericPart := fileSlice[0]
+		numericPart := fileSlice[timestampIdx]
 		result, err := strconv.Atoi(numericPart)
 		if err != nil {
 			continue
 		}
 		migrations[index] = migrationFile{
 			Timestamp: result,
+			FileName:  targetFile,
 			Path:      path,
 			IsNewFile: false,
 		}
