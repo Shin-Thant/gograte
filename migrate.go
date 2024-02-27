@@ -86,7 +86,7 @@ func Migrate(args []string) {
 		return migrations[i].Timestamp < migrations[j].Timestamp
 	})
 
-	records, err := queryMigrationRecord(db)
+	records, err := queryAllMigrations(db)
 	if err != nil {
 		log.Fatalf("Error querying migration records: %v\n", err)
 	}
@@ -175,7 +175,7 @@ func Migrate(args []string) {
 					hasPassedDownMigrateCmt = true
 					continue
 				}
-				isComment := strings.HasPrefix(line, "--")
+				isComment := strings.HasPrefix(line, commentSyntax)
 				if isComment {
 					continue
 				}
