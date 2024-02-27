@@ -94,6 +94,7 @@ func Migrate(args []string) {
 	var filteredMigrationFiles []migrationFile
 	for _, m := range migrations {
 		if len(records) == 0 && action == "up" {
+			m.IsNewFile = true
 			filteredMigrationFiles = append(filteredMigrationFiles, m)
 			continue
 		}
