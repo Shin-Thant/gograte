@@ -201,9 +201,9 @@ func Migrate(args []string) {
 
 		switch action {
 		case "up":
-			err = upMigrate(&m, tx)
+			err = onUpMigrate(&m, tx)
 		case "down":
-			err = downMigrate(&m, tx)
+			err = onDownMigrate(&m, tx)
 		}
 		if err != nil {
 			return

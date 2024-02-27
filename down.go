@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func downMigrate(m *migrationFile, tx *sql.Tx) error {
+func onDownMigrate(m *migrationFile, tx *sql.Tx) error {
 	_, err := updateVersionRecord(m, tx, false)
 	if err != nil {
 		log.Printf("Error updating version record: %v\n", err)

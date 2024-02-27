@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-func upMigrate(m *migrationFile, tx *sql.Tx) error {
+func onUpMigrate(m *migrationFile, tx *sql.Tx) error {
 	if m.IsNewFile {
 		_, err := insertVersionRecord(m, tx)
 		if err != nil {
