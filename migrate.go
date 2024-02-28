@@ -68,17 +68,25 @@ func Migrate(args []string) {
 	}
 	defer conn.Close()
 
+	_, err = CreateMigrationTableIfNotExist(db)
+	if err != nil {
+		log.Fatalf("Error creating migration table: %v\n", err)
+	}
+
+	switch action {
+	case "up":
+		upAllMigrate(db)
+	case "up-one":
+		upOneMigrate(db)
+	}
+	return
+
 	matches, err := findMigrationFiles()
 	if err != nil {
 		log.Fatalf("Error getting files: %v\n", err)
 	}
 	if len(matches) == 0 {
 		log.Fatalln("No migration files found.")
-	}
-
-	_, err = CreateMigrationTableIfNotExist(db)
-	if err != nil {
-		log.Fatalf("Error creating migration table: %v\n", err)
 	}
 
 	migrations := validateMigrationFilePaths(matches)
@@ -243,7 +251,7 @@ func validateDbURL(inputDbURL string) (*url.URL, error) {
 	return u, nil
 }
 
-var ACTIONS ValidData = []string{"up", "down"}
+var ACTIONS ValidData = []string{"up", "down", "up-one"}
 
 func validateAction(inputAction string) bool {
 	for _, action := range ACTIONS {
