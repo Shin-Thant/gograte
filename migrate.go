@@ -78,6 +78,10 @@ func Migrate(args []string) {
 		upAllMigrate(db)
 	case "up-one":
 		upOneMigrate(db)
+	case "down":
+		downAllMigrate(db)
+	case "down-one":
+		downOneMigrate(db)
 	}
 	return
 
@@ -251,7 +255,7 @@ func validateDbURL(inputDbURL string) (*url.URL, error) {
 	return u, nil
 }
 
-var ACTIONS ValidData = []string{"up", "down", "up-one"}
+var ACTIONS ValidData = []string{"up", "down", "up-one", "down-one"}
 
 func validateAction(inputAction string) bool {
 	for _, action := range ACTIONS {
