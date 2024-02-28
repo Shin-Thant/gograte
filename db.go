@@ -87,7 +87,6 @@ func runGetMigrationsQuery(statement string, db *sql.DB) ([]migrationRecord, err
 		if err != nil {
 			return nil, fmt.Errorf("error scanning migration record: %v", err)
 		}
-		fmt.Println(record)
 		records = append(records, *record)
 	}
 	return records, nil

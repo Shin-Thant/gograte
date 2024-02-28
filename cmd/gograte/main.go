@@ -25,6 +25,8 @@ func main() {
 		gograte.Init()
 	case "create":
 		gograte.Create(args)
+	case "status":
+		gograte.Status(args)
 	case "migrate":
 		gograte.Migrate(args)
 	default:
