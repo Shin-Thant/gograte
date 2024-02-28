@@ -133,7 +133,11 @@ func Migrate(args []string) {
 		return
 	}
 
-	for _, m := range filteredMigrationFiles {
+	startMigrate(filteredMigrationFiles, db, action)
+}
+
+func startMigrate(migrationFiles []migrationFile, db *sql.DB, action string) {
+	for _, m := range migrationFiles {
 		file, err := os.Open(m.Path)
 		if err != nil {
 			log.Fatalf("Error migration opening file: %v\n", err)
