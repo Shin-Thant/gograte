@@ -14,6 +14,7 @@ var QUERY_ONE_APPLIED_MIGRATION = `SELECT * FROM _gograte_db_versions WHERE is_a
 
 type migrationRecord struct {
 	ID        string
+	Name      string
 	VersionID int
 	IsApplied bool
 	CreatedAt string
@@ -38,6 +39,7 @@ func GetSQLDriver(driver string) string {
 func CreateMigrationTableIfNotExist(db *sql.DB) (sql.Result, error) {
 	return db.Exec(`CREATE TABLE IF NOT EXISTS _gograte_db_versions (
 		id VARCHAR(255) PRIMARY KEY,
+		name VARCHAR(255) NOT NULL,
 		version_id BIGINT UNIQUE NOT NULL,
 		is_applied BOOLEAN NOT NULL DEFAULT TRUE,
 		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -50,7 +52,7 @@ func runMigration(tx *sql.Tx, statement string) (sql.Result, error) {
 
 func insertVersionRecord(m *migrationFile, tx *sql.Tx) (sql.Result, error) {
 	id := uuid.New()
-	query := fmt.Sprintf(`INSERT INTO _gograte_db_versions (id, version_id) VALUES ('%s', %d);`, id.String(), m.Timestamp)
+	query := fmt.Sprintf(`INSERT INTO _gograte_db_versions (id, name, version_id) VALUES ('%s', '%s', %d);`, id.String(), m.Name, m.Timestamp)
 	return tx.Exec(query)
 }
 
@@ -81,10 +83,11 @@ func runGetMigrationsQuery(statement string, db *sql.DB) ([]migrationRecord, err
 	var records []migrationRecord
 	for rows.Next() {
 		record := NewMigrationRecord()
-		err = rows.Scan(&record.ID, &record.VersionID, &record.IsApplied, &record.CreatedAt)
+		err = rows.Scan(&record.ID, &record.Name, &record.VersionID, &record.IsApplied, &record.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("error scanning migration record: %v", err)
 		}
+		fmt.Println(record)
 		records = append(records, *record)
 	}
 	return records, nil

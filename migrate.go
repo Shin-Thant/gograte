@@ -12,8 +12,9 @@ import (
 )
 
 type migrationFile struct {
+	Name      string
 	Timestamp int
-	FileName  string
+	// FileName  string
 	Path      string
 	IsNewFile bool
 }
@@ -232,7 +233,7 @@ func startMigrate(migrationFiles []migrationFile, db *sql.DB, action string) {
 			return
 		}
 
-		log.Println("OK    ", m.FileName)
+		log.Printf("OK    %d_%s.sql\n", m.Timestamp, m.Name)
 	}
 }
 

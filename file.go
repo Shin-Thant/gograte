@@ -17,24 +17,33 @@ func findMigrationFiles() ([]string, error) {
 }
 
 var timestampIdx = 0
+var nameIdx = 1
 
 func validateMigrationFilePaths(paths []string) []migrationFile {
 	migrations := make([]migrationFile, len(paths))
 
 	for index, path := range paths {
 		targetFile := filepath.Base(path)
-		fileSlice := strings.Split(targetFile, "_")
+		fileSlice := strings.SplitN(targetFile, "_", 2)
 		if len(fileSlice) != 2 {
 			continue
 		}
+
+		nameWithExt := fileSlice[nameIdx]
+		name := strings.TrimSuffix(nameWithExt, ".sql")
+		if !strings.HasSuffix(nameWithExt, ".sql") || name == "" {
+			continue
+		}
+
 		numericPart := fileSlice[timestampIdx]
 		result, err := strconv.Atoi(numericPart)
 		if err != nil {
 			continue
 		}
+
 		migrations[index] = migrationFile{
+			Name:      name,
 			Timestamp: result,
-			FileName:  targetFile,
 			Path:      path,
 			IsNewFile: false,
 		}
