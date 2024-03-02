@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"sort"
 	"strings"
 )
 
@@ -96,70 +95,9 @@ func Migrate(args []string) {
 		downOneMigrate(db)
 	case "down-to":
 		downToMigrate(version, db)
+	default:
+		log.Fatalf("Invalid action. Supported actions are: %s\n", ACTIONS.String())
 	}
-	return
-
-	matches, err := findMigrationFiles()
-	if err != nil {
-		log.Fatalf("Error getting files: %v\n", err)
-	}
-	if len(matches) == 0 {
-		log.Fatalln("No migration files found.")
-	}
-
-	migrations := validateMigrationFilePaths(matches)
-	sort.SliceStable(migrations, func(i, j int) bool {
-		return migrations[i].Timestamp < migrations[j].Timestamp
-	})
-
-	records, err := queryAllMigrations(db)
-	if err != nil {
-		log.Fatalf("Error querying migration records: %v\n", err)
-	}
-
-	var filteredMigrationFiles []migrationFile
-	for _, m := range migrations {
-		if len(records) == 0 && action == "up" {
-			m.IsNewFile = true
-			filteredMigrationFiles = append(filteredMigrationFiles, m)
-			continue
-		}
-
-		isInRecord := false
-
-	RecordLoop:
-		for _, record := range records {
-			switch action {
-			case "up":
-				if record.VersionID == m.Timestamp {
-					isInRecord = true
-					if !record.IsApplied {
-						filteredMigrationFiles = append(filteredMigrationFiles, m)
-					}
-					break RecordLoop
-				}
-			case "down":
-				if record.VersionID == m.Timestamp {
-					if record.IsApplied {
-						filteredMigrationFiles = append(filteredMigrationFiles, m)
-					}
-					break RecordLoop
-				}
-			}
-		}
-
-		if !isInRecord && action == "up" {
-			m.IsNewFile = true
-			filteredMigrationFiles = append(filteredMigrationFiles, m)
-		}
-	}
-
-	if len(filteredMigrationFiles) == 0 {
-		log.Println("No migration to run.")
-		return
-	}
-
-	startMigrate(filteredMigrationFiles, db, action)
 }
 
 func startMigrate(migrationFiles []migrationFile, db *sql.DB, action string) {
