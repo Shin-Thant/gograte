@@ -13,6 +13,23 @@ gograte migrate [db_driver] [db_url] [migrate_action]
 // Status
 gograte status [db_driver] [db_url]
 
+// Help
+gograte --help
+
+// Actions
+init - Create a new migration directory
+create - Create a new migration file
+status - Show the status of all migrations
+migrate - Apply or rollback migrations
+
+// Migrate Actions
+up - Apply all available migrations
+down - Rollback all migrations
+up-one - Apply the next available migration
+down-one - Rollback the last applied migration
+up-to - Apply all migrations up to a specific version
+down-to - Rollback all migrations down to a specific version
+
 // Examples
 gograte status postgres "postgres://localhost:5432/db"
 
