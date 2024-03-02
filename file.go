@@ -19,10 +19,10 @@ func findMigrationFiles() ([]string, error) {
 var timestampIdx = 0
 var nameIdx = 1
 
-func validateMigrationFilePaths(paths []string) []migrationFile {
-	migrations := make([]migrationFile, len(paths))
+func ValidateMigrationFilePaths(paths []string) []migrationFile {
+	migrations := make([]migrationFile, 0)
 
-	for index, path := range paths {
+	for _, path := range paths {
 		targetFile := filepath.Base(path)
 		fileSlice := strings.SplitN(targetFile, "_", 2)
 		if len(fileSlice) != 2 {
@@ -41,12 +41,12 @@ func validateMigrationFilePaths(paths []string) []migrationFile {
 			continue
 		}
 
-		migrations[index] = migrationFile{
+		migrations = append(migrations, migrationFile{
 			Name:      name,
 			Timestamp: result,
 			Path:      path,
 			IsNewFile: false,
-		}
+		})
 	}
 
 	return migrations

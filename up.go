@@ -29,7 +29,7 @@ func upMigrate(db *sql.DB, upOne bool) {
 		log.Fatalln("No migration files found.")
 	}
 
-	migrationFiles := validateMigrationFilePaths(matches)
+	migrationFiles := ValidateMigrationFilePaths(matches)
 	sort.SliceStable(migrationFiles, func(i, j int) bool {
 		return migrationFiles[i].Timestamp < migrationFiles[j].Timestamp
 	})
@@ -100,7 +100,7 @@ func upToMigrate(versionStr string, db *sql.DB) {
 		log.Fatalln("No migration files found.")
 	}
 
-	migrationFiles := validateMigrationFilePaths(matches)
+	migrationFiles := ValidateMigrationFilePaths(matches)
 	sort.SliceStable(migrationFiles, func(i, j int) bool {
 		return migrationFiles[i].Timestamp < migrationFiles[j].Timestamp
 	})
