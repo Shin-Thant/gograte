@@ -74,6 +74,9 @@ func upToMigrate(versionStr string, db *sql.DB) {
 	if err != nil {
 		log.Fatalf("Error querying migrations: %v\n", err)
 	}
+	if len(records) == 0 {
+		log.Fatalln("No migration found.")
+	}
 
 	recordFound := checkRecordExists(records, version)
 	if !recordFound {
