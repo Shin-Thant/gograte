@@ -75,7 +75,7 @@ func upToMigrate(versionStr string, db *sql.DB) {
 		log.Fatalf("Error querying migrations: %v\n", err)
 	}
 	if len(records) == 0 {
-		log.Fatalln("No migration found.")
+		log.Fatalln("No migration files found.")
 	}
 
 	recordFound := checkRecordExists(records, version)
@@ -102,7 +102,7 @@ func upToMigrate(versionStr string, db *sql.DB) {
 
 	migrationFiles := validateMigrationFilePaths(matches)
 	sort.SliceStable(migrationFiles, func(i, j int) bool {
-		return migrationFiles[i].Timestamp > migrationFiles[j].Timestamp
+		return migrationFiles[i].Timestamp < migrationFiles[j].Timestamp
 	})
 
 	var filteredMigrationFiles []migrationFile
