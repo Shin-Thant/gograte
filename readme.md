@@ -30,3 +30,7 @@ Move to your project and use those commands.
     4. `down`
     5. `down-one`
     6. `down-to` (example `down-to [version]`)
+4. Help
+    ```
+    gograte --help
+    ```

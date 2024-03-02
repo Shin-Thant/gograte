@@ -10,7 +10,14 @@ import (
 )
 
 func main() {
+	help := flag.Bool("help", false, "Show usage message")
 	flag.Parse()
+
+	if *help {
+		fmt.Println(gograte.UsageMessage)
+		return
+	}
+
 	args := flag.Args()
 
 	if len(args) == 0 {
