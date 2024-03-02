@@ -3,15 +3,15 @@ on: [push]
 jobs:
     test:
         runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                go-version: ["1.16", "1.20", "1.21"]
+        # strategy:
+        #     matrix:
+        #         go-version: ["1.16", "1.20", "1.21"]
         steps:
             - uses: actions/checkout@v4
-            - name: Setup Go ${{ matrix.go-version }}
+            - name: Setup Go
               uses: actions/setup-go@v4
-              with:
-                  go-version: ${{ matrix.go-version }}
+              # with:
+              #     go-version: ${{ matrix.go-version }}
             - name: Display Go version
               run: go version
             - name: Install dependencies
