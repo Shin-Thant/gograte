@@ -9,6 +9,9 @@ import (
 func Status(args []string) {
 	driver := args[DRIVER]
 	dbURL := args[DB_URL]
+	if len(args) > 3 {
+		log.Fatalf("Invalid number of arguments.")
+	}
 
 	if !validateDbDriver(driver) {
 		log.Fatalf("Invalid database driver. Supported databases are: %s\n", DB_DRIVERS.String())
