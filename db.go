@@ -69,6 +69,10 @@ func queryAppliedMigrations(db *sql.DB) ([]migrationRecord, error) {
 	return runGetMigrationsQuery(QUERY_APPLIED_MIGRATIONS, db)
 }
 
+func queryNonAppliedMigrations(db *sql.DB) ([]migrationRecord, error) {
+	return runGetMigrationsQuery(QUERY_NON_APPLIED_MIGRATIONS, db)
+}
+
 func queryLatestAppliedMigration(db *sql.DB) ([]migrationRecord, error) {
 	return runGetMigrationsQuery(QUERY_ONE_APPLIED_MIGRATION, db)
 }

@@ -38,11 +38,13 @@ func (v *ValidData) String() string {
 var DRIVER = 1
 var DB_URL = 2
 var ACTION = 3
+var VERSION = 4
 
 func Migrate(args []string) {
 	driver := args[DRIVER]
 	dbURL := args[DB_URL]
 	action := args[ACTION]
+	version := ""
 
 	if !validateDbDriver(driver) {
 		log.Fatalf("Invalid database driver. Supported databases are: %s\n", DB_DRIVERS.String())
@@ -53,6 +55,9 @@ func Migrate(args []string) {
 	}
 	if !validateAction(action) {
 		log.Fatalf("Invalid action. Supported actions are: %s\n", ACTIONS.String())
+	}
+	if action == "up-to" && len(args) == 5 {
+		version = args[VERSION]
 	}
 
 	driver = GetSQLDriver(driver)
@@ -79,6 +84,8 @@ func Migrate(args []string) {
 		upAllMigrate(db)
 	case "up-one":
 		upOneMigrate(db)
+	case "up-to":
+		upToMigrate(version, db)
 	case "down":
 		downAllMigrate(db)
 	case "down-one":
@@ -256,7 +263,7 @@ func validateDbURL(inputDbURL string) (*url.URL, error) {
 	return u, nil
 }
 
-var ACTIONS ValidData = []string{"up", "down", "up-one", "down-one"}
+var ACTIONS ValidData = []string{"up", "down", "up-one", "down-one", "up-to"}
 
 func validateAction(inputAction string) bool {
 	for _, action := range ACTIONS {
