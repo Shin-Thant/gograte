@@ -41,7 +41,7 @@ func downMigrate(records []migrationRecord, db *sql.DB, downOne bool) {
 
 	migrationFiles := validateMigrationFilePaths(matches)
 	sort.SliceStable(migrationFiles, func(i, j int) bool {
-		return migrationFiles[i].Timestamp < migrationFiles[j].Timestamp
+		return migrationFiles[i].Timestamp > migrationFiles[j].Timestamp
 	})
 
 	var filteredMigrationFiles []migrationFile
