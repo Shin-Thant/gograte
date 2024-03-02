@@ -8,7 +8,7 @@ import (
 )
 
 var QUERY_ALL_MIGRATIONS = `SELECT * FROM _gograte_db_versions ORDER BY created_at ASC;`
-var QUERY_APPLIED_MIGRATIONS = `SELECT * FROM _gograte_db_versions WHERE is_applied = true ORDER BY created_at ASC;`
+var QUERY_APPLIED_MIGRATIONS = `SELECT * FROM _gograte_db_versions WHERE is_applied = true ORDER BY created_at DESC;`
 var QUERY_NON_APPLIED_MIGRATIONS = `SELECT * FROM _gograte_db_versions WHERE is_applied = false ORDER BY created_at ASC;`
 var QUERY_ONE_APPLIED_MIGRATION = `SELECT * FROM _gograte_db_versions WHERE is_applied = true ORDER BY created_at DESC LIMIT 1;`
 

@@ -56,7 +56,11 @@ func Migrate(args []string) {
 	if !validateAction(action) {
 		log.Fatalf("Invalid action. Supported actions are: %s\n", ACTIONS.String())
 	}
-	if action == "up-to" && len(args) == 5 {
+
+	if action == "up-to" || action == "down-to" {
+		if len(args) != 5 {
+			log.Fatalln("Invalid number of arguments. Please provide a version number.")
+		}
 		version = args[VERSION]
 	}
 
@@ -90,6 +94,8 @@ func Migrate(args []string) {
 		downAllMigrate(db)
 	case "down-one":
 		downOneMigrate(db)
+	case "down-to":
+		downToMigrate(version, db)
 	}
 	return
 
@@ -263,7 +269,7 @@ func validateDbURL(inputDbURL string) (*url.URL, error) {
 	return u, nil
 }
 
-var ACTIONS ValidData = []string{"up", "down", "up-one", "down-one", "up-to"}
+var ACTIONS ValidData = []string{"up", "down", "up-one", "down-one", "up-to", "down-to"}
 
 func validateAction(inputAction string) bool {
 	for _, action := range ACTIONS {
