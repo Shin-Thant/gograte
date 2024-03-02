@@ -1,6 +1,6 @@
 module github.com/Shin-Thant/gograte
 
-go 1.21.4
+go 1.21
 
 require (
 	github.com/google/uuid v1.6.0
