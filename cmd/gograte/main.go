@@ -6,7 +6,9 @@ import (
 	"os"
 
 	"github.com/Shin-Thant/gograte"
+	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
