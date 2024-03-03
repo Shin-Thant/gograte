@@ -13,7 +13,7 @@ func Status(args []string) {
 		log.Fatalf("Invalid number of arguments.")
 	}
 
-	if !validateDbDriver(driver) {
+	if !ValidateDbDriver(driver) {
 		log.Fatalf("Invalid database driver. Supported databases are: %s\n", DB_DRIVERS.String())
 	}
 	validatedURL, err := validateDbURL(dbURL)

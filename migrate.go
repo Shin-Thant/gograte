@@ -45,7 +45,7 @@ func Migrate(args []string) {
 	action := args[ACTION]
 	version := ""
 
-	if !validateDbDriver(driver) {
+	if !ValidateDbDriver(driver) {
 		log.Fatalf("Invalid database driver. Supported databases are: %s\n", DB_DRIVERS.String())
 	}
 	driver = GetSQLDriver(driver)
@@ -190,7 +190,7 @@ func startMigrate(migrationFiles []migrationFile, db *sql.DB, action string) {
 
 var DB_DRIVERS ValidData = []string{"mysql", "postgres", "sqlite3"}
 
-func validateDbDriver(inputDriver string) bool {
+func ValidateDbDriver(inputDriver string) bool {
 	for _, name := range DB_DRIVERS {
 		if name == inputDriver {
 			return true
