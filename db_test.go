@@ -13,10 +13,16 @@ import (
 )
 
 func TestGetSQLDriver(t *testing.T) {
-	inputDriver := "invalid one"
-	mappedDriver := gograte.GetSQLDriver(inputDriver)
-	if mappedDriver != "" {
-		t.Error("Result should be empty string.")
+	drivers := make(map[string]string)
+	drivers["sqlite3"] = "sqlite"
+	drivers["postgres"] = "pgx"
+	drivers["mysql"] = "mysql"
+
+	for driver, expected := range drivers {
+		mappedDriver := gograte.GetSQLDriver(driver)
+		if mappedDriver != expected {
+			t.Errorf("Expected %s but got %s.", expected, mappedDriver)
+		}
 	}
 }
 
