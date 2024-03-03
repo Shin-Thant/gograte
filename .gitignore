@@ -1,3 +1,5 @@
 /test_data
 
 /cmd/gograte/gograte
+
+.env
