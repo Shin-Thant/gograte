@@ -4,6 +4,12 @@
 
 This project is highly inspired by [Goose](https://github.com/pressly/goose) which is also a database migration tool. I was susprised by the simplicity of this tool. So, I wanted to build by myself. This project includes most of the features Goose offers.
 
+### Install
+
+```sh
+go get github.com/Shin-Thant/gograte
+```
+
 ### Guides
 
 Move to `cmd/gograte` directory and run `go install`.
