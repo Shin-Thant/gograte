@@ -26,14 +26,13 @@ func NewMigrationRecord() *migrationRecord {
 
 func GetSQLDriver(driver string) string {
 	switch driver {
-	case "mssql":
-		return "sqlserver"
 	case "sqlite3":
 		return "sqlite"
-	case "postgres", "redshift":
+	case "postgres":
 		return "pgx"
+	default:
+		return driver
 	}
-	return ""
 }
 
 func CreateMigrationTableIfNotExist(db *sql.DB) (sql.Result, error) {
