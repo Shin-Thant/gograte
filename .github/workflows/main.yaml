@@ -21,7 +21,7 @@ jobs:
                     --health-timeout 5s 
                     --health-retries 5
         env:
-            DATABASE_URL: postgres://postgres:pg4Shin27DB@@*@localhost:5432/test
+            DATABASE_URL: postgres://postgres:postgres@localhost:5432/test
         steps:
             - uses: actions/checkout@v4
             - name: Setup Go ${{ matrix.go-version }}
