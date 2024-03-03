@@ -21,13 +21,16 @@ func TestGetSQLDriver(t *testing.T) {
 }
 
 func TestCreateMigrationTableIfNotExist(t *testing.T) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalln("Error loading .env file")
-	}
 	DATABASE_URL := os.Getenv("DATABASE_URL")
 	if DATABASE_URL == "" {
-		log.Fatalln("DATABASE_URL is not set.")
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatalln("Error loading .env file")
+		}
+		DATABASE_URL = os.Getenv("DATABASE_URL")
+		if DATABASE_URL == "" {
+			log.Fatalln("DATABASE_URL is not set.")
+		}
 	}
 
 	// setup database connection
