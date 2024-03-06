@@ -7,8 +7,10 @@ This project is highly inspired by [Goose](https://github.com/pressly/goose) whi
 ### Install
 
 ```sh
-go get github.com/Shin-Thant/gograte
+go install github.com/Shin-Thant/gograte/cmd/gograte@latest
 ```
+
+This will install the `gograte` binary to your `$GOPATH/bin` directory.
 
 ### Guides
 
