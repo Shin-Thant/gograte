@@ -1,8 +1,7 @@
 name: Build Docker Image
 on:
-    push:
-        branches:
-            - main
+    release:
+        types: [published]
 jobs:
     push_to_registery:
         name: Push Docker Image to Docker Hub
