@@ -2,6 +2,8 @@ FROM golang:bullseye
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y nano && apt-get install -y vim
+
 RUN go install github.com/Shin-Thant/gograte/cmd/gograte@latest
 
 # 1. /bin/bash - start the interactive shell
