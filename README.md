@@ -42,3 +42,6 @@ Move to your project and use those commands.
     ```
     gograte --help
     ```
+
+
+<!-- Security scan triggered at 2026-09-03 22:00:29 -->
